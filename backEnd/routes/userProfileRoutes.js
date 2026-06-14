@@ -47,8 +47,8 @@ const userProfileValidation = [
 
     body("userStatus")
         .trim()
-        .isIn(["ACTIVE", "INACTIVE"])
-        .withMessage("User status must be ACTIVE or INACTIVE")
+        .isIn(["ACTIVE", "INACTIVE", "LOCKED"])
+        .withMessage("User status must be ACTIVE, INACTIVE, or LOCKED")
 ];
 
 router.get(

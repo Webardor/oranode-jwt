@@ -4,7 +4,8 @@ function UserProfileModal({
   formData,
   onChange,
   onClose,
-  onSave
+  onSave,
+  onDelete
 }) {
   if (!isOpen) return null;
 
@@ -102,7 +103,10 @@ function UserProfileModal({
           </button>
 
           {mode === "edit" && (
-            <button className="delete-btn">
+            <button
+              className="delete-btn"
+              onClick={onDelete}
+            >
               Delete
             </button>
           )}

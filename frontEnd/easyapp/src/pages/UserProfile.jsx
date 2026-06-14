@@ -5,7 +5,9 @@ import UserProfileModal from "../components/UserProfileModal";
 
 import {
   getUsers,
-  createUser
+  createUser,
+  updateUser,
+  deleteUser
 } from "../services/userProfileService";
 
 import "../css/userProfile.css";
@@ -17,6 +19,8 @@ function UserProfile() {
   const [loading, setLoading] = useState(true);
 
   const [error, setError] = useState("");
+
+  const [notice, setNotice] = useState(null);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -34,6 +38,20 @@ function UserProfile() {
   useEffect(() => {
     loadUsers();
   }, []);
+
+  useEffect(() => {
+    if (!notice) return undefined;
+
+    const timer = window.setTimeout(() => {
+      setNotice(null);
+    }, 3500);
+
+    return () => window.clearTimeout(timer);
+  }, [notice]);
+
+  const showNotice = (type, message) => {
+    setNotice({ type, message });
+  };
 
   const loadUsers = async () => {
 
@@ -107,37 +125,103 @@ function UserProfile() {
 
   const handleSave = async () => {
 
-  try {
+    try {
 
-    if (mode === "create") {
-
-      await createUser({
+      const payload = {
         userName: formData.userName,
         loginId: formData.loginId,
         emailAddress: formData.emailAddress,
         mobileNo: formData.mobileNo,
         userStatus: formData.userStatus
-      });
+      };
+
+      if (mode === "create") {
+
+        await createUser(payload);
+
+        await loadUsers();
+
+        setIsOpen(false);
+
+        showNotice("success", "User created successfully.");
+        return;
+      }
+
+      await updateUser(formData.userId, payload);
 
       await loadUsers();
 
       setIsOpen(false);
 
-      alert("User Created Successfully");
+      showNotice("success", "User updated successfully.");
+
+    } catch (error) {
+
+      console.error(error);
+
+      showNotice("error",
+        error.response?.data?.errors?.[0]?.msg ||
+        error.response?.data?.message ||
+        error.message
+      );
+
     }
 
-  } catch (error) {
+  };
 
-    console.error(error);
+  const handleDelete = async () => {
 
-    alert(error.message);
+    try {
 
-  }
+      await deleteUser(formData.userId);
 
-};
+      await loadUsers();
+
+      setIsOpen(false);
+
+      showNotice("success", "User deleted successfully.");
+
+    } catch (error) {
+
+      console.error(error);
+
+      showNotice("error",
+        error.response?.data?.message ||
+        error.message
+      );
+
+    }
+
+  };
+
+  const getStatusClass = (status) => {
+    if (status === "ACTIVE") return "status-active";
+    if (status === "LOCKED") return "status-locked";
+    return "status-inactive";
+  };
 
   return (
     <div>
+
+      {notice && (
+        <div className={`toast-notice toast-${notice.type}`} role="status">
+          <div>
+            <strong>
+              {notice.type === "success" ? "Success" : "Action needed"}
+            </strong>
+            <span>{notice.message}</span>
+          </div>
+
+          <button
+            type="button"
+            className="toast-close"
+            onClick={() => setNotice(null)}
+            aria-label="Close message"
+          >
+            x
+          </button>
+        </div>
+      )}
 
       <h1 className="page-title">
         USERS REPORT
@@ -222,13 +306,7 @@ function UserProfile() {
 
                   <td>
 
-                    <span
-                      className={
-                        row.userStatus === "ACTIVE"
-                          ? "status-active"
-                          : "status-inactive"
-                      }
-                    >
+                    <span className={getStatusClass(row.userStatus)}>
                       {row.userStatus}
                     </span>
 
@@ -253,6 +331,7 @@ function UserProfile() {
         onChange={handleChange}
         onClose={() => setIsOpen(false)}
         onSave={handleSave}
+        onDelete={handleDelete}
       />
 
     </div>
