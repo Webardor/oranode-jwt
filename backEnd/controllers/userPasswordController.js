@@ -93,6 +93,110 @@ const getAllUserPasswords = async (_req, res) => {
     }
 };
 
+const createUserPassword = async (req, res) => {
+    if (hasValidationErrors(req, res)) {
+        return;
+    }
+
+    let connection;
+
+    try {
+        const { userId, isActive, newPassword } = req.body;
+        const numericUserId = Number(userId);
+
+        connection = await oracledb.getConnection();
+
+        const userResult = await connection.execute(
+            `
+            SELECT COUNT(*) AS USER_COUNT
+            FROM APP_USERPROFILE
+            WHERE USER_ID = :USER_ID
+            `,
+            {
+                USER_ID: numericUserId
+            },
+            {
+                outFormat: oracledb.OUT_FORMAT_OBJECT
+            }
+        );
+
+        if (userResult.rows[0].USER_COUNT === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "User profile not found"
+            });
+        }
+
+        const existingResult = await connection.execute(
+            `
+            SELECT COUNT(*) AS PASSWORD_COUNT
+            FROM APP_USERPASSWORD
+            WHERE USER_ID = :USER_ID
+            `,
+            {
+                USER_ID: numericUserId
+            },
+            {
+                outFormat: oracledb.OUT_FORMAT_OBJECT
+            }
+        );
+
+        if (existingResult.rows[0].PASSWORD_COUNT > 0) {
+            return res.status(409).json({
+                success: false,
+                message: "Password record already exists for this user"
+            });
+        }
+
+        const passwordHash = await bcrypt.hash(newPassword, 12);
+
+        await connection.execute(
+            `
+            INSERT INTO APP_USERPASSWORD
+            (
+                USER_ID,
+                PASSWORD_HASH,
+                PASSWORD_CREATED,
+                PASSWORD_UPDATED,
+                IS_ACTIVE
+            )
+            VALUES
+            (
+                :USER_ID,
+                :PASSWORD_HASH,
+                SYSDATE,
+                SYSDATE,
+                :IS_ACTIVE
+            )
+            `,
+            {
+                USER_ID: numericUserId,
+                PASSWORD_HASH: passwordHash,
+                IS_ACTIVE: Number(isActive)
+            }
+        );
+
+        await connection.commit();
+
+        return res.status(201).json({
+            success: true,
+            message: "Password record created successfully"
+        });
+    } catch (err) {
+        if (connection) {
+            try {
+                await connection.rollback();
+            } catch (rollbackErr) {
+                console.error("Oracle rollback error:", rollbackErr.message);
+            }
+        }
+
+        return sendServerError(res, err);
+    } finally {
+        await closeConnection(connection);
+    }
+};
+
 const updateUserPassword = async (req, res) => {
     if (hasValidationErrors(req, res)) {
         return;
@@ -160,5 +264,6 @@ const updateUserPassword = async (req, res) => {
 
 module.exports = {
     getAllUserPasswords,
+    createUserPassword,
     updateUserPassword
 };

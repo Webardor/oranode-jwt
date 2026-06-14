@@ -31,6 +31,11 @@ export const getPasswordRecords = async () => {
   return unwrapList(response);
 };
 
+export const createPasswordRecord = async (payload) => {
+  const response = await api.post("/", payload);
+  return unwrapMutation(response);
+};
+
 export const updatePasswordRecord = async (userId, payload) => {
   const response = await api.put(`/${userId}`, payload);
   return unwrapMutation(response);

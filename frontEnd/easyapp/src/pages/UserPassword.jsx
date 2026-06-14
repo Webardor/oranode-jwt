@@ -4,6 +4,7 @@ import { FaKey } from "react-icons/fa";
 import UserPasswordModal from "../components/UserPasswordModal";
 
 import {
+  createPasswordRecord,
   getPasswordRecords,
   updatePasswordRecord
 } from "../services/userPasswordService";
@@ -41,6 +42,7 @@ function UserPassword() {
   const [error, setError] = useState("");
   const [searchText, setSearchText] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("edit");
   const [notice, setNotice] = useState(null);
   const [formData, setFormData] = useState({
     userId: "",
@@ -100,10 +102,20 @@ function UserPassword() {
     ));
   }, [records, searchText]);
 
-  const activeCount = records.filter((record) => record.isActive === "1").length;
-  const inactiveCount = records.length - activeCount;
+  const handleCreate = () => {
+    setModalMode("create");
+    setFormData({
+      userId: "",
+      userName: "",
+      loginId: "",
+      isActive: "1",
+      newPassword: ""
+    });
+    setIsOpen(true);
+  };
 
   const handleEdit = (record) => {
+    setModalMode("edit");
     setFormData({
       ...record,
       newPassword: ""
@@ -120,15 +132,28 @@ function UserPassword() {
 
   const handleSave = async () => {
     try {
-      await updatePasswordRecord(formData.userId, {
+      const payload = {
         isActive: Number(formData.isActive),
         newPassword: formData.newPassword
-      });
+      };
+
+      if (modalMode === "create") {
+        await createPasswordRecord({
+          ...payload,
+          userId: Number(formData.userId)
+        });
+      } else {
+        await updatePasswordRecord(formData.userId, payload);
+      }
 
       await loadRecords();
 
       setIsOpen(false);
-      showNotice("success", "Password record updated successfully.");
+      showNotice("success",
+        modalMode === "create"
+          ? "Password record created successfully."
+          : "Password record updated successfully."
+      );
     } catch (error) {
       console.error(error);
 
@@ -180,11 +205,12 @@ function UserPassword() {
             onChange={(e) => setSearchText(e.target.value)}
           />
 
-          <div className="password-stats">
-            <span>Total: {records.length}</span>
-            <span>Active: {activeCount}</span>
-            <span>Inactive: {inactiveCount}</span>
-          </div>
+          <button
+            className="create-btn"
+            onClick={handleCreate}
+          >
+            Create
+          </button>
         </div>
 
         {loading ? (
@@ -249,6 +275,7 @@ function UserPassword() {
 
       <UserPasswordModal
         isOpen={isOpen}
+        mode={modalMode}
         formData={formData}
         onChange={handleChange}
         onClose={() => setIsOpen(false)}

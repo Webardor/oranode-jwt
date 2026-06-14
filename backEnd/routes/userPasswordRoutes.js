@@ -13,12 +13,31 @@ const userIdParamValidation = [
         .withMessage("User ID must be a positive integer")
 ];
 
-const passwordRecordValidation = [
+const createPasswordRecordValidation = [
+    body("userId")
+        .isInt({ min: 1 })
+        .withMessage("User ID must be a positive integer"),
+
     body("isActive")
         .isInt({ min: 0, max: 1 })
         .withMessage("Active flag must be 0 or 1"),
 
     body("newPassword")
+        .trim()
+        .notEmpty()
+        .withMessage("New password is required")
+        .bail()
+        .isLength({ min: 8, max: 128 })
+        .withMessage("New password must be 8-128 characters")
+];
+
+const updatePasswordRecordValidation = [
+    body("isActive")
+        .isInt({ min: 0, max: 1 })
+        .withMessage("Active flag must be 0 or 1"),
+
+    body("newPassword")
+        .trim()
         .optional({ values: "falsy" })
         .isLength({ min: 8, max: 128 })
         .withMessage("New password must be 8-128 characters")
@@ -29,10 +48,16 @@ router.get(
     userPasswordController.getAllUserPasswords
 );
 
+router.post(
+    "/",
+    createPasswordRecordValidation,
+    userPasswordController.createUserPassword
+);
+
 router.put(
     "/:userId",
     userIdParamValidation,
-    passwordRecordValidation,
+    updatePasswordRecordValidation,
     userPasswordController.updateUserPassword
 );
 

@@ -1,5 +1,6 @@
 function UserPasswordModal({
   isOpen,
+  mode,
   formData,
   onChange,
   onClose,
@@ -7,11 +8,15 @@ function UserPasswordModal({
 }) {
   if (!isOpen) return null;
 
+  const isCreateMode = mode === "create";
+
   return (
     <div className="modal-overlay">
       <div className="modal-box password-modal-box">
         <div className="modal-header">
-          <h2>MANAGE USER PASSWORD</h2>
+          <h2>
+            {isCreateMode ? "CREATE USER PASSWORD" : "MANAGE USER PASSWORD"}
+          </h2>
 
           <button
             className="close-btn"
@@ -22,17 +27,32 @@ function UserPasswordModal({
         </div>
 
         <div className="modal-body">
-          <div className="password-summary">
-            <div>
-              <span>User</span>
-              <strong>{formData.userName || "Unassigned user"}</strong>
-            </div>
+          {isCreateMode ? (
+            <div className="form-group">
+              <label>User ID</label>
 
-            <div>
-              <span>Login ID</span>
-              <strong>{formData.loginId || "-"}</strong>
+              <input
+                type="number"
+                name="userId"
+                value={formData.userId}
+                onChange={onChange}
+                min="1"
+                placeholder="Enter existing user ID"
+              />
             </div>
-          </div>
+          ) : (
+            <div className="password-summary">
+              <div>
+                <span>User</span>
+                <strong>{formData.userName || "Unassigned user"}</strong>
+              </div>
+
+              <div>
+                <span>Login ID</span>
+                <strong>{formData.loginId || "-"}</strong>
+              </div>
+            </div>
+          )}
 
           <div className="form-group">
             <label>Active Status</label>
@@ -48,14 +68,18 @@ function UserPasswordModal({
           </div>
 
           <div className="form-group">
-            <label>New Password</label>
+            <label>{isCreateMode ? "Password" : "New Password"}</label>
 
             <input
               type="password"
               name="newPassword"
               value={formData.newPassword}
               onChange={onChange}
-              placeholder="Leave blank to keep current password"
+              placeholder={
+                isCreateMode
+                  ? "Enter password"
+                  : "Leave blank to keep current password"
+              }
               autoComplete="new-password"
             />
           </div>
