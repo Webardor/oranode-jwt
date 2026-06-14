@@ -294,10 +294,18 @@ app.post('/api/login', loginLimiter, loginValidation, async (req, res) => {
 
         // Fetch hash AND role — never select * (principle of least privilege)
         const query = `
-            SELECT LOGIN_PW_HASH, USER_ROLE
-            FROM   SA_USERPASSWORD
-            WHERE  LOGIN_ID = :username
-              AND  IS_ACTIVE = 1
+            SELECT
+                p.USER_ID,
+                p.USER_NAME,
+                p.LOGIN_ID,
+                p.USER_STATUS,
+                w.PASSWORD_HASH
+            FROM APP_USERPROFILE p
+            INNER JOIN APP_USERPASSWORD w
+                ON w.USER_ID = p.USER_ID
+            WHERE LOWER(p.LOGIN_ID) = LOWER(:username)
+              AND p.USER_STATUS = 'ACTIVE'
+              AND w.IS_ACTIVE = 1
         `;
         const result = await connection.execute(
             query,
@@ -309,7 +317,7 @@ app.post('/api/login', loginLimiter, loginValidation, async (req, res) => {
         // Prevents username enumeration via timing attack
         const dummyHash  = '$2b$12$eKNwQegeu1cGBhczps11ruktXf7GXO0n5g3Krex.FuRs985ndzkN6';
         const storedHash = result.rows.length > 0
-                           ? result.rows[0].LOGIN_PW_HASH
+                           ? result.rows[0].PASSWORD_HASH
                            : dummyHash;
 
         const match = await bcrypt.compare(password, storedHash);
@@ -324,25 +332,32 @@ app.post('/api/login', loginLimiter, loginValidation, async (req, res) => {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 
-        const userRole = result.rows[0].USER_ROLE;   // Role from DB, not hardcoded
+        const user = result.rows[0];
+        const userRole = 'USER';
         const jti      = crypto.randomUUID();         // Unique token ID (for revocation)
 
         // Access token — short lived
         const accessToken = jwt.sign(
-            { sub: username, role: userRole, jti },
+            {
+                sub: user.LOGIN_ID,
+                userId: user.USER_ID,
+                userName: user.USER_NAME,
+                role: userRole,
+                jti
+            },
             process.env.JWT_SECRET,
             { expiresIn: '15m', issuer: 'erp-api', audience: 'erp-client' }
         );
 
         // Refresh token — longer lived, separate secret
         const refreshToken = jwt.sign(
-            { sub: username, jti },
+            { sub: user.LOGIN_ID, userId: user.USER_ID, jti },
             process.env.JWT_REFRESH_SECRET,
             { expiresIn: '8h', issuer: 'erp-api', audience: 'erp-client' }
         );
 
         logger.info('Successful login', {
-            username  : username,
+            username  : user.LOGIN_ID,
             role      : userRole,
             ip        : req.ip,
             requestId : req.requestId
@@ -352,7 +367,13 @@ app.post('/api/login', loginLimiter, loginValidation, async (req, res) => {
             success       : true,
             accessToken,
             refreshToken,
-            expiresIn     : 900   // 15 minutes in seconds
+            expiresIn     : 900,   // 15 minutes in seconds
+            user          : {
+                userId: user.USER_ID,
+                userName: user.USER_NAME,
+                loginId: user.LOGIN_ID,
+                role: userRole
+            }
         });
 
     } catch (err) {

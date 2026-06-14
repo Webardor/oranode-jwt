@@ -61,6 +61,99 @@ body{
     padding:0 20px;
 }
 
+.header-right{
+    position:relative;
+    display:flex;
+    align-items:center;
+}
+
+.user-menu{
+    position:relative;
+}
+
+.user-menu-button{
+    min-width:170px;
+    height:42px;
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:9px;
+    border:1px solid rgba(255,255,255,.35);
+    border-radius:5px;
+    padding:0 12px;
+    background:rgba(255,255,255,.08);
+    color:#ffffff;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:700;
+}
+
+.user-menu-button:hover{
+    background:rgba(255,255,255,.16);
+}
+
+.user-menu-button span{
+    max-width:180px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.user-menu-chevron{
+    width:12px;
+    height:12px;
+}
+
+.user-menu-dropdown{
+    position:absolute;
+    top:50px;
+    right:0;
+    z-index:1000;
+    width:240px;
+    border:1px solid #d7dde5;
+    border-radius:6px;
+    background:#ffffff;
+    color:#111827;
+    box-shadow:0 14px 35px rgba(15,23,42,.22);
+    overflow:hidden;
+}
+
+.user-menu-summary{
+    padding:14px 16px;
+    border-bottom:1px solid #edf2f7;
+}
+
+.user-menu-summary strong{
+    display:block;
+    margin-bottom:4px;
+    font-size:15px;
+}
+
+.user-menu-summary span{
+    display:block;
+    color:#6b7280;
+    font-size:13px;
+    overflow-wrap:anywhere;
+}
+
+.logout-button{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border:none;
+    padding:13px 16px;
+    background:#ffffff;
+    color:#b00020;
+    cursor:pointer;
+    font-weight:700;
+    text-align:left;
+}
+
+.logout-button:hover{
+    background:#fff5f6;
+}
+
 .content-area{
     padding:30px;
 }
@@ -79,4 +172,24 @@ body{
     padding:20px;
     border:1px solid #ddd;
     border-radius:8px;
+}
+
+@media(max-width:768px){
+    .sidebar{
+        width:220px;
+        padding:16px;
+    }
+
+    .header{
+        padding:0 14px;
+    }
+
+    .user-menu-button{
+        min-width:0;
+        max-width:190px;
+    }
+
+    .user-menu-button span{
+        max-width:120px;
+    }
 }
