@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { FaHome, FaUsers } from "react-icons/fa";
+import { FaHome, FaKey, FaUsers } from "react-icons/fa";
 
 function Sidebar() {
   return (
@@ -23,6 +23,14 @@ function Sidebar() {
       >
         <FaUsers />
         <span>User Profile</span>
+      </NavLink>
+
+      <NavLink
+        to="/user-password"
+        className="menu-link"
+      >
+        <FaKey />
+        <span>User Password</span>
       </NavLink>
 
     </div>

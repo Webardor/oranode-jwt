@@ -17,6 +17,7 @@ const { body, validationResult } = require('express-validator');
 const winston      = require('winston');
 const crypto       = require('crypto');
 const userProfileRoutes = require('./routes/userProfileRoutes');
+const userPasswordRoutes = require('./routes/userPasswordRoutes');
 
 const logsDir = path.join(__dirname, 'logs');
 fs.mkdirSync(logsDir, { recursive: true });
@@ -251,6 +252,7 @@ const authenticateToken = (req, res, next) => {
 // ─────────────────────────────────────────────
 app.use('/api/user-profile-new', userProfileRoutes);
 app.use('/api/user-profile', userProfileRoutes);
+app.use('/api/user-password', userPasswordRoutes);
 
 const loginValidation = [
     body('username')

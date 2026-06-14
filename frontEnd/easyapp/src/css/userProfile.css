@@ -73,12 +73,39 @@
     background:#fafafa;
 }
 
+.password-toolbar{
+    gap:18px;
+}
+
 .search-box{
     width:350px;
     padding:10px;
     border:1px solid #cccccc;
     border-radius:4px;
     font-size:14px;
+}
+
+.password-search{
+    width:min(460px, 100%);
+}
+
+.password-stats{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.password-stats span{
+    min-width:96px;
+    padding:8px 12px;
+    border:1px solid #d7dde5;
+    border-radius:4px;
+    background:#ffffff;
+    color:#374151;
+    font-size:13px;
+    font-weight:700;
+    text-align:center;
 }
 
 .create-btn{
@@ -119,6 +146,18 @@
 
 .user-table tr:hover{
     background:#fafafa;
+}
+
+.hash-pill{
+    display:inline-block;
+    min-width:142px;
+    padding:6px 10px;
+    border:1px solid #dbe3ee;
+    border-radius:4px;
+    background:#f8fafc;
+    color:#374151;
+    font-family:Consolas, "Courier New", monospace;
+    font-size:13px;
 }
 
 .report-message{
@@ -184,6 +223,10 @@
     box-shadow:0 10px 30px rgba(0,0,0,.25);
 }
 
+.password-modal-box{
+    width:760px;
+}
+
 .modal-header{
     display:flex;
     justify-content:space-between;
@@ -207,6 +250,36 @@
 
 .modal-body{
     padding:20px;
+}
+
+.password-summary{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:12px;
+    margin-bottom:20px;
+}
+
+.password-summary div{
+    padding:12px;
+    border:1px solid #d7dde5;
+    border-radius:4px;
+    background:#f8fafc;
+}
+
+.password-summary span{
+    display:block;
+    margin-bottom:5px;
+    color:#6b7280;
+    font-size:12px;
+    font-weight:700;
+    text-transform:uppercase;
+}
+
+.password-summary strong{
+    display:block;
+    color:#111827;
+    font-size:15px;
+    overflow-wrap:anywhere;
 }
 
 .form-group{
@@ -281,6 +354,18 @@
 
     .search-box{
         width:100%;
+    }
+
+    .password-stats{
+        width:100%;
+    }
+
+    .password-stats span{
+        flex:1 1 120px;
+    }
+
+    .password-summary{
+        grid-template-columns:1fr;
     }
 
     .modal-box{

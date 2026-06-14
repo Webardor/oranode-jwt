@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node --check controllers/userProfileController.js && node --check routes/userProfileRoutes.js && node --check services/userProfileService.js && node --check config/db.js"
+    "check": "node --check server.js && node --check controllers/userProfileController.js && node --check controllers/userPasswordController.js && node --check routes/userProfileRoutes.js && node --check routes/userPasswordRoutes.js && node --check services/userProfileService.js && node --check config/db.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
