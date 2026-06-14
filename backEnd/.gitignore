@@ -1,0 +1,6 @@
+node_modules/
+.env
+logs/
+logs.txt
+abc.txt
+changed on 09 06 2026.txt
